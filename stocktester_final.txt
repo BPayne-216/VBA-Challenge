@@ -1,0 +1,117 @@
+Sub Stockdata()
+    Dim ws As Worksheet
+    Dim ticker As String
+    Dim year_start As Double
+    Dim year_end As Double
+    Dim yearly_change As Double
+    Dim percent_change As Double
+    Dim volume_total As Double
+    Dim rowcount As Long
+    Dim lastrow As Long
+    Dim best_stock As String
+    Dim best_gain As Double
+    Dim worst_stock As String
+    Dim worst_loss As Double
+    Dim best_vol_stock As String
+    Dim best_vol_total As Double
+
+
+    ' Set WS_Count equal to the number of worksheets in the active workbook.
+    For Each ws In Worksheets
+
+        ' Begin the loop.
+         ' Set up Ticker Column and Summary Header
+         ws.Cells(1, 9).Value = "Ticker"
+         ' Set up Yearly Change Column and Summary Header
+         ws.Cells(1, 10).Value = "Yearly Change"
+         ' Set up Percent Change Column and Summary Header
+         ws.Cells(1, 11).Value = "Percent Change"
+         ' Set up Total Stock Volume Column and Summary Header
+         ws.Cells(1, 12).Value = "Total Stock Volume"
+         
+        ' Set up Variables for Loop
+         volume_total = 0
+         rowcount = 2
+         year_start = 0
+         year_end = 0
+         yearly_change = 0
+         percent_change = 0
+        ' Set the variable to loop through rows
+         lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        ' Loop through the tickers
+            For I = 2 To lastrow
+                If ws.Cells(I, 1).Value <> ws.Cells(I - 1, 1).Value Then
+                    year_start = ws.Cells(I, 3).Value
+                End If
+            'Total up Volume for each individual ticker for the given year
+                volume_total = volume_total + ws.Cells(I, 7)
+            'Conditional on Ticker Changes
+            'Move Ticker and Volume to the Summary
+                If ws.Cells(I, 1).Value <> ws.Cells(I + 1, 1).Value Then
+                    ws.Cells(rowcount, 9).Value = ws.Cells(I, 1).Value
+                    ws.Cells(rowcount, 12).Value = volume_total
+            'Calculate the Yearly Change in Price, move to the Summary
+                    year_end = ws.Cells(I, 6).Value
+                    yearly_change = year_end - year_start
+                    ws.Cells(rowcount, 10).Value = yearly_change
+            'Need to set the Conditional Formatting
+                    If yearly_change > 0 Then
+                        ws.Cells(rowcount, 10).Interior.ColorIndex = 4
+                    Else
+                        ws.Cells(rowcount, 10).Interior.ColorIndex = 3
+                    End If
+      
+            'Add 1 to rowcount to move to next row in Summary
+                rowcount = rowcount + 1
+            'Reset total stock volume, start price, end price, yearly change, percent change
+                volume_total = 0
+                year_start = 0
+                year_end = 0
+                yearly_change = 0
+                percent_change = 0
+                End If
+           Next I
+           '***Challenge***'
+           'Create Greatest table'
+           ws.Cells(2, 15).Value = "Greatest % Increase"
+           ws.Cells(3, 15).Value = "Greatest % Decrease"
+           ws.Cells(4, 15).Value = "Greatest Total Volume"
+           ws.Cells(1, 16).Value = "Ticker"
+           ws.Cells(1, 17).Value = "Value"
+           'Set the variable to loop through Summary'
+           lastrow = ws.Cells(Rows.Count, 9).End(xlUp).Row
+           'Set the best stock to first stock'
+           best_gain = ws.Cells(2, 11).Value
+           'Set the worst stock to first stock'
+           worst_loss = ws.Cells(2, 11).Value
+           'Set the greates volume to first stock'
+           best_vol_total = ws.Cells(2, 12).Value
+           'Create loop for Summary table'
+           For j = 2 To lastrow
+                'Need conditional for best gain'
+                If ws.Cells(j, 11).Value > best_gain Then
+                    best_gain = ws.Cells(j, 11).Value
+                    best_stock = ws.Cells(j, 9).Value
+                End If
+                'Need conditional  for worst loss'
+                If ws.Cells(j, 11).Value < worst_loss Then
+                    worst_loss = ws.Cells(j, 11).Value
+                    worst_stock = ws.Cells(j, 9).Value
+                End If
+                'Need conditional for greatest volume'
+                If ws.Cells(j, 12).Value > best_vol_total Then
+                    best_vol_total = ws.Cells(j, 12).Value
+                    best_vol_stock = ws.Cells(j, 9).Value
+                End If
+           Next j
+           'Move data to Summary table
+           ws.Cells(2, 16).Value = best_stock
+           ws.Cells(2, 17).Value = best_gain
+           ws.Cells(3, 16).Value = worst_stock
+           ws.Cells(3, 17).Value = worst_loss
+           ws.Cells(4, 16).Value = best_vol_stock
+           ws.Cells(4, 17).Value = best_vol_total
+               
+    Next ws
+    
+End Sub
